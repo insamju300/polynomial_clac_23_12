@@ -12,6 +12,10 @@ public class Calc {
     exp = exp.trim(); //입력된 문장에서 좌우의 여백을 제거한다.
     exp = stripOuterBracket(exp); //문자열 양끝의 괄호를 모두 벗긴 문자열을 반환한다.
 
+    if(isNegativeCaseBracket(exp)){
+      exp=exp.substring(1) + " * -1";
+    }
+
     if(recursionDebug){
       System.out.printf("exp(%d) : %s\n", runCallCount, exp);
     }
@@ -70,6 +74,25 @@ public class Calc {
     }
 
     throw new RuntimeException("처리할 수 있는 계산식이 아닙니다"); //상기 조건들에서 해결하지 못한 문자열의 경우 에러를 발생시켜 호출한 곳으로 던져준다.
+  }
+
+  private static boolean isNegativeCaseBracket(String exp) {
+    if(exp.startsWith("-")==false){
+      return false;
+    }
+    int bracketCount = 0;
+    for(int i = 0; i < exp.length(); i++){
+      if (exp.charAt(i)== '(') { //문자열의 i번째 문자가 (라면
+        bracketCount++; //괄호의 깊이를 체크하는 변수의 값을 더해준다.
+      } else if (exp.charAt(i)==')') {//문자열의 i번째 문자가 )라면
+        bracketCount--; //괄호의 깊이를 체크하는 변수의 값을 빼준다.
+      }
+
+      if(bracketCount==0){
+        if(exp.length() - 1 == i) return true;
+      }
+    }
+    return false;
   }
 
   private static int findSplitPointIndexBy(String exp, char findChar) {
