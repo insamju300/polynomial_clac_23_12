@@ -1,9 +1,21 @@
 package com.ll;
 
 public class Calc {
+
+  public static boolean recursionDebug = true;
+
+  public static int runCallCount = 0;
+
   public static int run(String exp) { // 10 + (10 + 5)
+    runCallCount++;
+
     exp = exp.trim(); //입력된 문장에서 좌우의 여백을 제거한다.
     exp = stripOuterBracket(exp); //문자열 양끝의 괄호를 모두 벗긴 문자열을 반환한다.
+
+    if(recursionDebug){
+      System.out.printf("exp(%d) : %s\n", runCallCount, exp);
+    }
+
 
     // 연산기호가 없으면 바로 리턴
     if (!exp.contains(" ")) return Integer.parseInt(exp);
