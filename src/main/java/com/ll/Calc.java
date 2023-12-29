@@ -1,12 +1,19 @@
 package com.ll; // 패키지
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 public class Calc {
 
   public static boolean recursionDebug = true; // 내가 디버그 모드를 켜겠다 할때는 true로 변경
 
   public static int runCallCount = 0;
 
-  public static int run(String exp) { // -(10 + 5)
+  public static int run(String exp) {
+    return _run(exp, 0);
+  }
+
+  public static int _run(String exp, int depth) {
     runCallCount++;
 
     exp = exp.trim();
@@ -18,8 +25,10 @@ public class Calc {
       exp = changeNegativeBracket(exp, pos[0], pos[1]);
     }
     exp = stripOuterBracket(exp);
+
     if (recursionDebug) {
-      System.out.printf("exp(%d) : %s\n", runCallCount, exp);
+      System.out.print(" ".repeat(depth * 4));
+      System.out.printf("exp(%d in %d) : %s\n", runCallCount, depth, exp);
     }
 
     // 연산기호가 없으면 바로 리턴
@@ -31,8 +40,8 @@ public class Calc {
     boolean needToCompound = needToMultiply && needToPlus;
     boolean needToSplit = exp.contains("(") || exp.contains(")");
 
-    if (needToSplit) {  // -(10 + 5)
-
+    if (needToSplit) {
+      exp = exp.replaceAll("- ", "\\+ -");
       int splitPointIndex = findSplitPointIndex(exp);
 
       String firstExp = exp.substring(0, splitPointIndex);
@@ -40,14 +49,16 @@ public class Calc {
 
       char operator = exp.charAt(splitPointIndex);
 
-      exp = Calc.run(firstExp) + " " + operator + " " + Calc.run(secondExp);
+      exp = Calc._run(firstExp, depth + 1) + " " + operator + " " + Calc._run(secondExp, depth + 1);
 
-      return Calc.run(exp);
+      return Calc._run(exp, depth + 1);
 
     } else if (needToCompound) {
       String[] bits = exp.split(" \\+ ");
 
-      return Integer.parseInt(bits[0]) + Calc.run(bits[1]); // TODO
+      String newExp = Arrays.stream(bits).mapToInt(e -> Calc.run(e)).mapToObj(e -> e + "").collect(Collectors.joining(" + "));
+
+      return Calc._run(newExp, depth + 1);
     }
     if (needToPlus) {
       exp = exp.replaceAll("\\- ", "\\+ \\-");
